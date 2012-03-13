@@ -2,5 +2,6 @@
 <resources>
 
     <string name="places_api_key">INSERT_YOUR_PLACES_API_KEY_HERE</string>
+    <string name="maps_api_key">INSERT_YOUR_MAPS_API_KEY_HERE</string>
 
 </resources>
