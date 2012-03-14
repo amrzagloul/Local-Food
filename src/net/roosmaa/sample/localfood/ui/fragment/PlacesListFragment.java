@@ -16,6 +16,7 @@ public class PlacesListFragment extends ListFragment implements
   private SimpleCursorAdapter mAdapter;
   
   private static final String[] CURSOR_PROJECTION = new String[] {
+      Restaurants._ID,
       Restaurants.PLACE_ID,
       Restaurants.PLACE_NAME,
       Restaurants.PLACE_RATING,

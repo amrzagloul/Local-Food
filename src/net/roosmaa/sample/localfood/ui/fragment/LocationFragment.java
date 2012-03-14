@@ -27,7 +27,7 @@ import android.util.Log;
 public class LocationFragment extends Fragment implements Receiver,
     LocationListener
 {
-  private static final String TAG = "LocationFragment";
+  public static final String TAG = "LocationFragment";
   
   private static final int LOCATION_TOTAL_TIME = 15000;
   private static final int LOCATION_MIN_TIME = 1000;
@@ -85,6 +85,7 @@ public class LocationFragment extends Fragment implements Receiver,
     mStatus = STATUS_IDLE;
     mFetchOperations = 0;
     
+    mProviderCriteria = new Criteria();
     mProviderCriteria.setAltitudeRequired(false);
     mProviderCriteria.setSpeedRequired(false);
     mProviderCriteria.setBearingRequired(false);

@@ -85,9 +85,11 @@ public class FoodProvider extends ContentProvider
     {
     case RESTAURANTS:
       builder.table(Tables.RESTAURANTS);
+      break;
     case RESTAURANTS_ID:
       final String placeId = Restaurants.getPlaceId(uri);
       builder.table(Tables.RESTAURANTS).where(PlacesColumns.PLACE_ID, placeId);
+      break;
     }
     
     return builder;

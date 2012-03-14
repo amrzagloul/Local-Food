@@ -74,8 +74,8 @@ public class FinderService extends IntentService
       return;
     }
     
-    final float latitude = intent.getFloatExtra(EXTRA_LATITUDE, 0);
-    final float longitude = intent.getFloatExtra(EXTRA_LONGITUDE, 0);
+    final double latitude = intent.getDoubleExtra(EXTRA_LATITUDE, 0);
+    final double longitude = intent.getDoubleExtra(EXTRA_LONGITUDE, 0);
     final String apiKey = getResources().getString(R.string.places_api_key);
     
     try
@@ -97,7 +97,7 @@ public class FinderService extends IntentService
     }
   }
   
-  private String fetchData(float latitude, float longitude, String apiKey)
+  private String fetchData(double latitude, double longitude, String apiKey)
       throws IOException
   {
     HttpClient httpClient = MobileHttpClient.newInstance(
@@ -122,7 +122,8 @@ public class FinderService extends IntentService
     
     if (entity == null)
     {
-      // TODO: Report error
+      Log.e(TAG, "Http response does not contain an entity.");
+      throw new IOException("HttpEntity not included for the request.");
     }
     
     try
@@ -175,14 +176,14 @@ public class FinderService extends IntentService
   }
   
   private void processData(String json) throws JSONException, ParseException,
-      RemoteException, OperationApplicationException
+      RemoteException, OperationApplicationException, Exception
   {
     try
     {
       JSONObject root = new JSONObject(json);
       
       final String status = root.getString("status");
-      if (status != "OK" && status != "ZERO_RESULTS")
+      if (!status.equals("OK") && !status.equals("ZERO_RESULTS"))
       {
         Log.e(TAG, "Got an unexpected response from server: " + status);
         throw new ParseException("Got an unexpected response from server.");
@@ -220,12 +221,12 @@ public class FinderService extends IntentService
         builder.withValue(Restaurants.PLACE_LNG, loc.getDouble("lng"));
         builder.withValue(Restaurants.PLACE_ICON, res.optString("icon"));
         builder.withValue(Restaurants.PLACE_NAME, res.getString("name"));
-        builder.withValue(Restaurants.PLACE_RATING, res.getDouble("rating"));
-        builder.withValue(Restaurants.PLACE_REFERENCE,
-            res.optString("reference"));
-        builder.withValue(Restaurants.PLACE_TYPES, types);
-        builder
-            .withValue(Restaurants.PLACE_VICINITY, res.optString("vicinity"));
+        builder.withValue(Restaurants.PLACE_RATING, res.optDouble("rating", 0));
+        builder.withValue(
+            Restaurants.PLACE_REFERENCE, res.optString("reference"));
+        builder.withValue(Restaurants.PLACE_TYPES, types.toString());
+        builder.withValue(
+            Restaurants.PLACE_VICINITY, res.optString("vicinity"));
         
         batch.add(builder.build());
       }
@@ -246,6 +247,11 @@ public class FinderService extends IntentService
     catch (OperationApplicationException e)
     {
       Log.e(TAG, "Batch operation failed.", e);
+      throw e;
+    }
+    catch (Exception e)
+    {
+      Log.e(TAG, "Something failed.", e);
       throw e;
     }
   }
