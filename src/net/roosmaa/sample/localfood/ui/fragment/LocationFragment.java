@@ -37,8 +37,9 @@ public class LocationFragment extends Fragment implements Receiver,
   public static final int STATUS_IDLE = 0;
   public static final int STATUS_ACQUIRING_LOCATION = 1;
   public static final int STATUS_FETCHING_DATA = 2;
-
-  public interface StatusListener {
+  
+  public interface StatusListener
+  {
     void onStatusChanged(LocationFragment fragment);
   }
   
@@ -285,7 +286,7 @@ public class LocationFragment extends Fragment implements Receiver,
   {
     mFetchOperations -= 1;
     
-    if (mFetchOperations < 1)
+    if (mFetchOperations < 1 && mStatus == STATUS_FETCHING_DATA)
     {
       mFetchOperations = 0;
       setStatus(STATUS_IDLE);
@@ -317,11 +318,19 @@ public class LocationFragment extends Fragment implements Receiver,
     return false;
   }
   
+  public int getStatus()
+  {
+    return mStatus;
+  }
+  
   private void setStatus(int status)
   {
-    if (mStatus != status && mStatusListener != null)
-      mStatusListener.onStatusChanged(this);
-    mStatus = status;
+    if (mStatus != status)
+    {
+      mStatus = status;
+      if (mStatusListener != null)
+        mStatusListener.onStatusChanged(this);
+    }
   }
   
   public void setStatusListener(StatusListener listener)
