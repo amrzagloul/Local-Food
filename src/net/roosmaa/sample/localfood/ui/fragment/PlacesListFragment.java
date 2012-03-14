@@ -2,6 +2,8 @@ package net.roosmaa.sample.localfood.ui.fragment;
 
 import net.roosmaa.sample.localfood.R;
 import net.roosmaa.sample.localfood.provider.FoodContract.Restaurants;
+import net.roosmaa.sample.localfood.ui.PlacesMapActivity;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
@@ -9,6 +11,8 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
+import android.view.View;
+import android.widget.ListView;
 
 public class PlacesListFragment extends ListFragment implements
     LoaderManager.LoaderCallbacks<Cursor>
@@ -47,6 +51,27 @@ public class PlacesListFragment extends ListFragment implements
     setListShown(false);
     
     getLoaderManager().initLoader(0, null, this);
+  }
+  
+  @Override
+  public void onListItemClick(ListView l, View v, int position, long id)
+  {
+    Cursor cur = (Cursor) mAdapter.getItem(position);
+    int idx = cur.getColumnIndex(Restaurants.PLACE_ID);
+    String placeId = cur.getString(idx);
+    
+    if (true)
+    {
+      final LocationFragment frag = (LocationFragment)
+          getFragmentManager().findFragmentByTag(LocationFragment.TAG);
+      
+      Intent intent = new Intent(getActivity(), PlacesMapActivity.class);
+      intent.putExtra("PlaceId", placeId);
+      if (frag != null)
+        intent.putExtra("LocationArguments", frag.getInstanceArguments());
+      
+      startActivity(intent);
+    }
   }
   
   @Override

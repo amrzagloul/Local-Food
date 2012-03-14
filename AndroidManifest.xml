@@ -25,6 +25,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.PlacesMapActivity" />
+        <activity android:name=".ui.GoogleMapsActivity" />
 
         <service android:name=".service.FinderService" />
 
