@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <color name="holo_blue">#30b3e3</color>
+
+    <color name="holo_blue">#30b3e3</color>
+    <color name="bright_foreground">#fff</color>
+    <color name="bright_foreground_inverse">@color/holo_blue</color>
+    <color name="bright_foreground_disabled">#80ffffff</color>
+    <color name="dim_foreground">#bebebe</color>
+    <color name="dim_foreground_disabled">#80bebebe</color>
+    <color name="dim_foreground_inverse">#4e8ca3</color>
+    <color name="dim_foreground_inverse_disabled">#804e8ca3</color>
+
 </resources>
