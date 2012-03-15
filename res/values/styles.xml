@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="ActionBar" />
+
+    <style name="ActionBar.Layout">
+        <item name="android:background">@drawable/action_bar_bg</item>
+        <item name="android:padding">5dp</item>
+    </style>
+
+    <style name="ActionBar.Text" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">20sp</item>
+    </style>
+
+    <style name="ActionBar.Button">
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="ActionBar.Status" parent="@android:style/TextAppearance">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:background">@drawable/status_bg</item>
+    </style>
+
+</resources>

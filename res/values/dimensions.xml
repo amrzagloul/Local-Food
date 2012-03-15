@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <dimen name="action_bar_status_height">20dp</dimen>
+    <dimen name="action_bar_status_height">35dp</dimen> <!-- 20dp - (-15dp margin) -->
     <dimen name="action_bar_bottom_margin">-20dp</dimen>
 
 </resources>

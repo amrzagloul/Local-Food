@@ -5,5 +5,6 @@
     <string name="app_name">Local Food</string>
     <string name="status_location">Acquiring location…</string>
     <string name="status_data">Finding nearby places…</string>
+    <string name="refresh">Refresh</string>
 
 </resources>
