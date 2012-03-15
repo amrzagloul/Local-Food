@@ -47,8 +47,6 @@ public class PlacesMapFragment extends ActivityManagerFragment implements
     View root = wnd.getDecorView();
     root.setVisibility(View.VISIBLE);
     root.setFocusableInTouchMode(true);
-    ((ViewGroup) root).setDescendantFocusability(
-        ViewGroup.FOCUS_AFTER_DESCENDANTS);
     
     mMapView = (MapView) root.findViewById(R.id.map_view);
     
