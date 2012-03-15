@@ -58,8 +58,8 @@ public class FoodProvider extends ContentProvider
     case RESTAURANTS:
       db.insertOrThrow(Tables.RESTAURANTS, null, values);
       getContext().getContentResolver().notifyChange(uri, null);
-      return Restaurants
-          .buildPlaceUri(values.getAsString(Restaurants.PLACE_ID));
+      return Restaurants.buildPlaceUri(
+          values.getAsString(Restaurants.PLACE_ID));
     default:
       throw new UnsupportedOperationException("Unknown uri: " + uri);
     }
@@ -103,7 +103,9 @@ public class FoodProvider extends ContentProvider
     final int match = sUriMatcher.match(uri);
     final QueryBuilder builder = simpleQuery(uri, match);
     
-    return builder.query(db, projection, sortOrder);
+    Cursor cur = builder.query(db, projection, sortOrder);
+    cur.setNotificationUri(getContext().getContentResolver(), uri);
+    return cur;
   }
   
   @Override
@@ -114,7 +116,9 @@ public class FoodProvider extends ContentProvider
     final int match = sUriMatcher.match(uri);
     final QueryBuilder builder = simpleQuery(uri, match);
     
-    return builder.update(db, values);
+    int count = builder.update(db, values);
+    getContext().getContentResolver().notifyChange(uri, null);
+    return count;
   }
   
   @Override
@@ -124,7 +128,9 @@ public class FoodProvider extends ContentProvider
     final int match = sUriMatcher.match(uri);
     final QueryBuilder builder = simpleQuery(uri, match);
     
-    return builder.delete(db);
+    int count = builder.delete(db);
+    getContext().getContentResolver().notifyChange(uri, null);
+    return count;
   }
   
 }
