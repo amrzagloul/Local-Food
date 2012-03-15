@@ -341,7 +341,7 @@ public class LocationFragment extends Fragment implements Receiver,
   
   private boolean setLocation(Location location)
   {
-    if (LocationUtils.isBetter(mLocation, location))
+    if (location != null && LocationUtils.isBetter(mLocation, location))
     {
       mLocation = location;
       
