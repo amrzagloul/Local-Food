@@ -29,6 +29,10 @@ import com.google.android.maps.OverlayItem;
 public class PlacesMapFragment extends ActivityManagerFragment implements
     LoaderManager.LoaderCallbacks<Cursor>
 {
+  public interface SelectedPlaceListener {
+    void onSelectedPlaceChanged(PlacesMapFragment fragment);
+  }
+  
   private MapView mMapView;
   private MyLocationOverlay mLocationOverlay;
   private PlacesOverlay mOverlay;
@@ -64,7 +68,7 @@ public class PlacesMapFragment extends ActivityManagerFragment implements
     mMapView.setBuiltInZoomControls(true);
     mLocationOverlay = new MyLocationOverlay(getActivity(), mMapView);
     mMapView.getOverlays().add(mLocationOverlay);
-    mOverlay = new PlacesOverlay(getActivity());
+    mOverlay = new PlacesOverlay(this, getActivity());
     mMapView.getOverlays().add(mOverlay);
     
     return root;
@@ -74,16 +78,12 @@ public class PlacesMapFragment extends ActivityManagerFragment implements
   public void onActivityCreated(Bundle savedInstanceState)
   {
     super.onActivityCreated(savedInstanceState);
+    final Bundle args = getArguments();
     
     if (savedInstanceState != null)
-    {
       mOverlay.setSelectedId(savedInstanceState.getString("selectedPlaceId"));
-    }
-    else
-    {
-      Bundle args = getArguments();
+    else if (args != null)
       mOverlay.setSelectedId(args.getString("placeId"));
-    }
     
     getLoaderManager().initLoader(0, null, this);
   }
@@ -114,10 +114,36 @@ public class PlacesMapFragment extends ActivityManagerFragment implements
     mLocationOverlay.disableCompass();
   }
   
+  public void setSelectedPlaceListener(SelectedPlaceListener listener)
+  {
+    mOverlay.setSelectedPlaceListener(listener);
+  }
+  
+  public String getSelectedPlaceId()
+  {
+    return mOverlay.getSelectedId();
+  }
+  
+  public void setSelectedPlaceId(String placeId)
+  {
+    final String oldPlaceId = mOverlay.getSelectedId();
+    
+    if ((placeId == null && oldPlaceId == null) || placeId.equals(oldPlaceId))
+      return;
+    
+    mOverlay.setSelectedId(placeId);
+    resetMapViewport();
+  }
+  
   private void setCursor(Cursor cursor)
   {
     mOverlay.setCursor(cursor);
-    
+    resetMapViewport();
+    mMapView.invalidate();
+  }
+  
+  private void resetMapViewport()
+  {
     final LocationFragment locationFragment = (LocationFragment)
         getFragmentManager().findFragmentByTag(LocationFragment.TAG);
     final MapController controller = mMapView.getController();
@@ -135,7 +161,6 @@ public class PlacesMapFragment extends ActivityManagerFragment implements
       controller.setZoom(17);
     }
     
-    mMapView.invalidate();
   }
   
   @Override
@@ -160,6 +185,7 @@ public class PlacesMapFragment extends ActivityManagerFragment implements
   private class PlacesOverlay extends ItemizedOverlay<OverlayItem>
   {
     private final ArrayList<String> mPlaceIds = new ArrayList<String>();
+    private PlacesMapFragment mFragment;
     private Context mContext;
     private Drawable mSelectedMarker;
     private Cursor mCursor;
@@ -168,11 +194,13 @@ public class PlacesMapFragment extends ActivityManagerFragment implements
     private int mIdxLatitude;
     private int mIdxLongitude;
     private String mSelectedId;
+    private SelectedPlaceListener mSelectedPlaceListener;
     
-    public PlacesOverlay(Context ctx)
+    public PlacesOverlay(PlacesMapFragment fragment, Context ctx)
     {
       super(boundCenterBottom(
           ctx.getResources().getDrawable(R.drawable.marker_default)));
+      mFragment = fragment;
       mContext = ctx;
       mSelectedMarker = boundCenterBottom(
           ctx.getResources().getDrawable(R.drawable.marker_selected));
@@ -191,6 +219,9 @@ public class PlacesMapFragment extends ActivityManagerFragment implements
       pos = mPlaceIds.indexOf(mSelectedId);
       if (pos != -1)
         getItem(pos).setMarker(mSelectedMarker);
+      
+      if (mSelectedPlaceListener != null)
+        mSelectedPlaceListener.onSelectedPlaceChanged(mFragment);
     }
     
     public OverlayItem getSelectedItem()
@@ -204,6 +235,11 @@ public class PlacesMapFragment extends ActivityManagerFragment implements
     public String getSelectedId()
     {
       return mSelectedId;
+    }
+    
+    public void setSelectedPlaceListener(SelectedPlaceListener listener)
+    {
+      mSelectedPlaceListener = listener;
     }
     
     public void setCursor(Cursor cursor)
@@ -268,7 +304,9 @@ public class PlacesMapFragment extends ActivityManagerFragment implements
       final OverlayItem item = getItem(position);
       item.setMarker(mSelectedMarker);
       mSelectedId = mPlaceIds.get(position);
-      // TODO: Notify selected id changed!
+      
+      if (mSelectedPlaceListener != null)
+        mSelectedPlaceListener.onSelectedPlaceChanged(mFragment);
       
       final String text = String.format(
           "%s - %s", item.getTitle(), item.getSnippet());
