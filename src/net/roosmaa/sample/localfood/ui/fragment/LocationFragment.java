@@ -11,6 +11,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -28,6 +29,11 @@ public class LocationFragment extends Fragment implements Receiver,
     LocationListener
 {
   public static final String TAG = "LocationFragment";
+  
+  private static final String PREFS_FILE = "LocationCache";
+  private static final String PREF_LATITUDE = "latitude";
+  private static final String PREF_LONGITUDE = "longitude";
+  private static final String PREF_ACQUIRE_TIME = "acquireTime";
   
   private static final int LOCATION_TOTAL_TIME = 15000;
   private static final int LOCATION_MIN_TIME = 1000;
@@ -50,6 +56,9 @@ public class LocationFragment extends Fragment implements Receiver,
   private Location mLocation;
   private int mStatus;
   private StatusListener mStatusListener;
+  private long mAcquireTime;
+  private float mLongitude;
+  private float mLatitude;
   
   /**
    * Reference counter for the number of {@link FinderService} invocations we
@@ -109,6 +118,8 @@ public class LocationFragment extends Fragment implements Receiver,
       if (loc != null)
         mLocation = loc;
     }
+    
+    reloadCached();
   }
   
   @Override
@@ -131,13 +142,25 @@ public class LocationFragment extends Fragment implements Receiver,
   {
     super.onResume();
     
-    // Restart listening for the location:
+    // Read preferences:
+    long prevAcquireTime = mAcquireTime;
+    reloadCached();
+    
     if (mStatus == STATUS_ACQUIRING_LOCATION)
     {
-      final LocationManager mgr = (LocationManager)
-          getActivity().getSystemService(Context.LOCATION_SERVICE);
-      
-      startAcquiringLocation(mgr);
+      if (prevAcquireTime != mAcquireTime)
+      {
+        // We the latest location somewhere else already:
+        setStatus(STATUS_IDLE);
+      }
+      else
+      {
+        // Restart listening for the location:
+        final LocationManager mgr = (LocationManager)
+            getActivity().getSystemService(Context.LOCATION_SERVICE);
+        
+        startAcquiringLocation(mgr);
+      }
     }
     // Get new location when we don't have a location and we aren't doing
     // anything:
@@ -176,6 +199,14 @@ public class LocationFragment extends Fragment implements Receiver,
     mReceiver.setReceiver(null);
   }
   
+  private void reloadCached()
+  {
+    SharedPreferences cache = getActivity().getSharedPreferences(PREFS_FILE, 0);
+    mAcquireTime = cache.getLong(PREF_ACQUIRE_TIME, 0);
+    mLatitude = cache.getFloat(PREF_LATITUDE, 0);
+    mLongitude = cache.getFloat(PREF_LONGITUDE, 0);
+  }
+  
   public void refreshLocation(boolean useCached)
   {
     // Already refreshing, ignore this request:
@@ -199,8 +230,8 @@ public class LocationFragment extends Fragment implements Receiver,
           gotBetterLocation = true;
       }
       
-      // TODO: Load new places from the internet while we're getting an even
-      // better location estimate.
+      // Load new places from the internet while we're getting an even better
+      // location estimate.
       if (gotBetterLocation)
         startFetchingData();
     }
@@ -313,6 +344,19 @@ public class LocationFragment extends Fragment implements Receiver,
     if (LocationUtils.isBetter(mLocation, location))
     {
       mLocation = location;
+      
+      // Cache the data:
+      mAcquireTime = mLocation.getTime();
+      mLatitude = (float) mLocation.getLatitude();
+      mLongitude = (float) mLocation.getLongitude();
+      SharedPreferences cache = getActivity().getSharedPreferences(PREFS_FILE,
+          0);
+      cache.edit()
+           .putLong(PREF_ACQUIRE_TIME, mAcquireTime)
+           .putFloat(PREF_LATITUDE, mLatitude)
+           .putFloat(PREF_LONGITUDE, mLongitude)
+           .commit();
+      
       return true;
     }
     return false;
@@ -321,6 +365,20 @@ public class LocationFragment extends Fragment implements Receiver,
   public int getStatus()
   {
     return mStatus;
+  }
+  
+  public double getLongitude()
+  {
+    if (mLocation == null || mLocation.getTime() < mAcquireTime)
+      return mLongitude;
+    return mLocation.getLongitude();
+  }
+  
+  public double getLatitude()
+  {
+    if (mLocation == null || mLocation.getTime() < mAcquireTime)
+      return mLatitude;
+    return mLocation.getLatitude();
   }
   
   private void setStatus(int status)
