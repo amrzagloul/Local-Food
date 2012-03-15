@@ -5,17 +5,13 @@
     android:layout_height="fill_parent"
     android:orientation="vertical" >
 
-    <fragment
+    <FrameLayout
         android:id="@+id/fragment_places_map"
-        android:name="net.roosmaa.sample.localfood.ui.fragment.PlacesMapFragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/fragment_action_bar" >
-
-        <!-- Preview: layout=@layout/fragment_places_map -->
-    </fragment>
+        android:layout_below="@+id/fragment_action_bar" />
 
     <fragment
         android:id="@+id/fragment_action_bar"
