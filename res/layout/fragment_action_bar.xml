@@ -27,9 +27,7 @@
             android:layout_height="match_parent"
             android:contentDescription="@string/refresh"
             android:gravity="center_vertical"
-            android:src="@drawable/ic_menu_refresh"
-            android:text="@string/hello" />
-
+            android:src="@drawable/ic_menu_refresh" />
     </LinearLayout>
 
     <TextView
